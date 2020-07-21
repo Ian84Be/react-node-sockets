@@ -13,5 +13,21 @@ app.get("/", (req, res) => {
 const server = http.createServer(app);
 const io = socketIo(server);
 
+let interval;
+
+io.on('connection', (socket) => {
+    console.log('socket CONNECTION socket.id', socket.id);
+    if (interval) clearInterval(interval);
+    interval = setInterval(() => getDataAndEmit(socket), 1000);
+    socket.on('disconnect', () => {
+        console.log('socket DISCONNECT')
+    });
+});
+
+const getDataAndEmit = (socket) => {
+    const response = new Date();
+    socket.emit('FromAPI', response);
+};
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`listening on port ${PORT}`));
+server.listen(PORT, () => console.log(`listening on port ${PORT}`));
